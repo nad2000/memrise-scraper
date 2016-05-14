@@ -31,12 +31,15 @@ def cards(*, level_url : str):
     """
     :level_url:   level URL
     """
+    def get_text(value):
+        return '' if value is None else value.text
+        
     soup = get_soup(level_url)
     
     for thing in soup.find_all(lambda tag: tag.has_attr("data-thing-id")):
         
         try:
-            cols = (thing.find("div", class_=col_name).find("div", class_="text").text
+            cols = (get_text(thing.find("div", class_=col_name).find("div", class_="text"))
                 for col_name in CARD_COLUMNS)
         except:
             continue
