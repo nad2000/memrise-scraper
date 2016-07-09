@@ -38,7 +38,7 @@ class Course(object):
 
     @property
     def name(self):
-        el = soup.find("h1", class_="course-name")
+        el = self.soup.find("h1", class_="course-name")
         return el.text if el else self.course_url.split('/')[-1]
 
     @property
