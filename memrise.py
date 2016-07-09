@@ -7,6 +7,19 @@ from bs4 import BeautifulSoup
 
 sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
+def lazy_property(fn):
+    """Decorator that makes a property lazy-evaluated.
+    """
+    attr_name = '_lazy_' + fn.__name__
+
+    @property
+    def _lazy_property(self):
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, fn(self))
+        return getattr(self, attr_name)
+    return _lazy_property
+
+
 def get_soup(url):
     # TODO: it works actually w/o cookies:
     res = requests.get(
@@ -14,46 +27,61 @@ def get_soup(url):
     soup = BeautifulSoup(res.text, "html.parser", from_encoding="utf-8")
     return soup
 
-    
-def levels(*, course_url : str):
-    """
-    :course_url:   course URL
-    """
-    soup = get_soup(course_url)
-    #levels = soup.find(lambda tag: tag.name == "div" and "levels" in tag.attrs.get("class"))
-    levels = soup.find_all("a", class_="level")
-    
-    for l in levels:
-        yield l.attrs.get("href")
+class Course(object):
+
+    def __init__(self, course_url):
+        self.course_url = course_url
+
+    @lazy_property
+    def soup(self):
+        return get_soup(self.course_url)
+
+    @property
+    def name(self):
+        el = soup.find("h1", class_="course-name")
+        return el.text if el else self.course_url.split('/')[-1]
+
+    @property
+    def levels(self):
+
+        #levels = soup.find(lambda tag: tag.name == "div" and "levels" in tag.attrs.get("class"))
+        levels = self.soup.find_all("a", class_="level")
+        
+        for l in levels:
+            url = l.attrs.get("href")
+            title = l.find("div", class_="level-title").text.strip()
+            yield (url, title)
 
 
-def cards(*, level_url : str):
-    """
-    :level_url:   level URL
-    """
-    def get_text(value):
-        return '' if value is None else value.text
-        
-    soup = get_soup(level_url)
-    
-    for thing in soup.find_all(lambda tag: tag.has_attr("data-thing-id")):
-        
-        try:
-            cols = (get_text(thing.find("div", class_=col_name).find("div", class_="text"))
-                for col_name in CARD_COLUMNS)
-        except:
-            continue
+    def cards(self, *, level_url : str):
+        """
+        :level_url:   level URL
+        """
+        def get_text(value):
+            return '' if value is None else value.text
             
-        yield cols
+        soup = get_soup(level_url)
+        
+        for thing in soup.find_all(lambda tag: tag.has_attr("data-thing-id")):
+            
+            try:
+                cols = (get_text(thing.find("div", class_=col_name).find("div", class_="text"))
+                    for col_name in CARD_COLUMNS)
+            except:
+                continue
+                
+            yield cols
 
             
 def dump_course(*, course_url : str):
     """
     :course_url:   course URL
     """
-    for level_url in levels(course_url=course_url):
-        print("***", level_url)
-        for card in cards(level_url=level_url):
+    course = Course(course_url=course_url)
+
+    for level_url, title in course.levels:
+        print("*** %s (%s)" % (title, level_url))
+        for card in course.cards(level_url=level_url):
             print('\t'.join(card))
         
 if __name__ == "__main__":
