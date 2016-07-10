@@ -18,8 +18,9 @@ def dump_tts(*, course_url : str):
 
         for word, *_ in course.cards(level_url=level_url):
             file_name = os.path.join(output_dir, word) + ".mp3"
-            tts = gTTS(word, lang="ko")
-            tts.save(file_name)
+            if not os.path.exists(file_name):
+                tts = gTTS(word, lang="ko")
+                tts.save(file_name)
 
 
 if __name__ == "__main__":
