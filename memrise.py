@@ -2,6 +2,7 @@ COURSE_URL = "/course/977288/korean-grammar-in-use-11/"
 CARD_COLUMNS = ("col_a", "col_b")
     
 import codecs, sys
+import re
 import requests
 from bs4 import BeautifulSoup
 
@@ -30,7 +31,15 @@ def get_soup(url):
 class Course(object):
 
     def __init__(self, course_url):
+        match = re.match(r'(.*)/(\d+)/?', course_url)
+        if match:
+            course_url, level = match.groups()
+        else:
+            level = None
+
         self.course_url = course_url
+        # a sligle level if it was included in the URL
+        self.level = level
 
     @lazy_property
     def soup(self):
@@ -49,6 +58,9 @@ class Course(object):
         
         for l in levels:
             url = l.attrs.get("href")
+            if self.level and not url.endswith(self.level + '/'):
+                continue  ## skip lelevel not requested
+
             title = l.find("div", class_="level-title").text.strip()
             yield (url, title)
 
