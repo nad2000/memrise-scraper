@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 COURSE_URL = "/course/977288/korean-grammar-in-use-11/"
 CARD_COLUMNS = ("col_a", "col_b")
     

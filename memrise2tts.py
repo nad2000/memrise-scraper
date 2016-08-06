@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import sys
 from memrise import Course, COURSE_URL
