@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import codecs
 from memrise import Course, COURSE_URL
 from gtts import gTTS
 
@@ -14,11 +15,15 @@ def dump_tts(*, course_url : str):
 
     for level_url, title in course.levels:
         print("*** %s (%s)" % (title, level_url), flush=True)
+        if sys.platform.startswith("win"):
+            # replace illegal symbols in the windows file name
+            title = title.replace(':', '-')
+            
         output_dir = os.path.join(course.name, title)
         if not no_audio:
             os.makedirs(output_dir, exist_ok=True)
 
-        with open(os.path.join(course.name, title) + ".csv", "w") as level_file:
+        with codecs.open(os.path.join(course.name, title) + ".csv", "w", encoding="utf-8") as level_file:
             for card in course.cards(level_url=level_url):
                 card = list(card)
                 word = card[0]
