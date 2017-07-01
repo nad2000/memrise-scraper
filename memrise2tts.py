@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-import sys
+import codecs, sys
 from memrise import Course, COURSE_URL
 from gtts import gTTS
 
@@ -10,7 +10,8 @@ def dump_tts(*, course_url : str):
     """
 
     course = Course(course_url=course_url)
-    os.makedirs(course.name, exist_ok=True)
+    os.makedirs(course.name.replace(' ', "\\ "), exist_ok=True)
+    print(f"* {course.name}\n\n")
 
     for level_url, title in course.levels:
         print("*** %s (%s)" % (title, level_url), flush=True)
@@ -31,6 +32,7 @@ def dump_tts(*, course_url : str):
 
 
 if __name__ == "__main__":
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
     no_audio = ("--no-audio" in sys.argv)
     if no_audio:
         sys.argv.pop(sys.argv.index("--no-audio"))

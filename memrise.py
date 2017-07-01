@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 COURSE_URL = "/course/977288/korean-grammar-in-use-11/"
 CARD_COLUMNS = ("col_a", "col_b")
-    
+
 import codecs, sys
 import re
 import requests
 from bs4 import BeautifulSoup
 
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 def lazy_property(fn):
     """Decorator that makes a property lazy-evaluated.
@@ -26,7 +25,7 @@ def get_soup(url):
     # TODO: it works actually w/o cookies:
     res = requests.get(
         url if url.strip().startswith("http") else "http://www.memrise.com" + url)
-    soup = BeautifulSoup(res.text, "html.parser", from_encoding="utf-8")
+    soup = BeautifulSoup(res.text, "html.parser")
     return soup
 
 class Course(object):
@@ -56,7 +55,7 @@ class Course(object):
 
         #levels = soup.find(lambda tag: tag.name == "div" and "levels" in tag.attrs.get("class"))
         levels = self.soup.find_all("a", class_="level")
-        
+
         for l in levels:
             url = l.attrs.get("href")
             if self.level and not url.endswith(self.level + '/'):
@@ -72,20 +71,20 @@ class Course(object):
         """
         def get_text(value):
             return '' if value is None else value.text
-            
+
         soup = get_soup(level_url)
-        
+
         for thing in soup.find_all(lambda tag: tag.has_attr("data-thing-id")):
-            
+
             try:
                 cols = (get_text(thing.find("div", class_=col_name).find("div", class_="text"))
                     for col_name in CARD_COLUMNS)
             except:
                 continue
-                
+
             yield cols
 
-            
+
 def dump_course(*, course_url : str):
     """
     :course_url:   course URL
@@ -96,9 +95,10 @@ def dump_course(*, course_url : str):
         print("*** %s (%s)" % (title, level_url))
         for card in course.cards(level_url=level_url):
             print('\t'.join(card))
-        
+
 if __name__ == "__main__":
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
     course_url = COURSE_URL if len(sys.argv) < 2 else sys.argv[1]
     dump_course(course_url=course_url)
-    
-    
+
+
