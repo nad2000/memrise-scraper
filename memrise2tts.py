@@ -11,7 +11,8 @@ def dump_tts(*, course_url : str):
     """
 
     course = Course(course_url=course_url)
-    os.makedirs(course.name.replace(' ', "\\ "), exist_ok=True)
+    course_dir_name = course.name #.replace(' ', "\\ ")
+    os.makedirs(course_dir_name, exist_ok=True)
     print(f"* {course.name}\n\n")
 
     for level_url, title in course.levels:
@@ -20,7 +21,7 @@ def dump_tts(*, course_url : str):
             # replace illegal symbols in the windows file name
             title = title.replace(':', '-')
 
-        output_dir = os.path.join(course.name, title)
+        output_dir = os.path.join(course_dir_name, title)
         if not no_audio:
             os.makedirs(output_dir, exist_ok=True)
 
@@ -30,7 +31,7 @@ def dump_tts(*, course_url : str):
                 word = card[0]
                 level_file.write('\t'.join(card))
                 level_file.write('\n')
-                file_name = os.path.join(output_dir, word) + ".mp3"
+                file_name = os.path.join(output_dir, word.replace('/', "|")) + ".mp3"
                 if not no_audio and not os.path.exists(file_name):
                     tts = gTTS(word, lang="ko")
                     tts.save(file_name)
