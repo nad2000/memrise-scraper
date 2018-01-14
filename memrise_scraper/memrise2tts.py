@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import os
 import codecs, sys
-from memrise import Course, COURSE_URL
+from .memrise import Course, COURSE_URL
 from gtts import gTTS
 
 
-def dump_tts(*, course_url : str):
+def dump_tts(*, course_url : str, no_audio : bool):
     """
     :course_url:   course URL
     """
@@ -37,10 +37,14 @@ def dump_tts(*, course_url : str):
                     tts.save(file_name)
 
 
-if __name__ == "__main__":
+def main():
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
     no_audio = ("--no-audio" in sys.argv)
     if no_audio:
         sys.argv.pop(sys.argv.index("--no-audio"))
     course_url = COURSE_URL if len(sys.argv) < 2 else sys.argv[1]
-    dump_tts(course_url=course_url)
+    dump_tts(course_url=course_url, no_audio=no_audio)
+
+
+if __name__ == "__main__":
+    main()

@@ -96,9 +96,12 @@ def dump_course(*, course_url : str):
         for card in course.cards(level_url=level_url):
             print('\t'.join(card))
 
-if __name__ == "__main__":
+
+def main():
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
     course_url = COURSE_URL if len(sys.argv) < 2 else sys.argv[1]
     dump_course(course_url=course_url)
 
 
+if __name__ == "__main__":
+    main()
