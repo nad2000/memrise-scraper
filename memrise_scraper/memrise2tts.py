@@ -1,13 +1,43 @@
 #!/usr/bin/env python
-import os
-import codecs, sys
+
+import os, re, codecs, sys
 from .memrise import Course, COURSE_URL
 from gtts import gTTS
+from urllib.parse import quote
+import requests
+from bs4 import BeautifulSoup
+from shutil import copyfileobj
 
 
-def dump_tts(*, course_url : str, no_audio : bool):
+def try_krdict(word : str, output_filename: str):
+    # import pdb; pdb.set_trace()
+
+    with requests.get("https://krdict.korean.go.kr/dicSearch/search?mainSearchWord=" + quote(word)) as res:
+        if res.status_code != 200:
+            return
+        soup = BeautifulSoup(res.text, "html.parser")
+    el = soup.find("img", dict(alt="", title=""))
+    if not el:
+        return
+    match = re.search("http.*mp3", el.attrs["onclick"])
+    if not match:
+        return
+    with requests.get(match[0], stream=True) as res:
+        if res.status_code != 200:
+            return
+        try:
+            with open(output_filename, "wb") as o:
+                copyfileobj(res.raw, o)
+            return output_filename
+        except:
+            return
+
+
+def dump_tts(*, course_url : str, no_audio : bool, lang : str = "ko"):
     """
     :course_url:   course URL
+    :no_audio:     skip donwloading the audio
+    :lang:         override the lanuage
     """
 
     course = Course(course_url=course_url)
@@ -33,8 +63,9 @@ def dump_tts(*, course_url : str, no_audio : bool):
                 level_file.write('\n')
                 file_name = os.path.join(output_dir, word.replace('/', "|")) + ".mp3"
                 if not no_audio and not os.path.exists(file_name):
-                    tts = gTTS(word, lang="ko")
-                    tts.save(file_name)
+                    if lang != "ko" or not try_krdict(word, file_name):
+                        tts = gTTS(word, lang=lang)
+                        tts.save(file_name)
 
 
 def main():
