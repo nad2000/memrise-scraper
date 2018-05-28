@@ -26,6 +26,7 @@ def try_krdict(word : str, output_filename: str):
         if res.status_code != 200:
             return
         try:
+            output_filename = "(krdict)".join(os.path.splitext(output_filename))
             with open(output_filename, "wb") as o:
                 copyfileobj(res.raw, o)
             return output_filename
@@ -62,7 +63,8 @@ def dump_tts(*, course_url : str, no_audio : bool, lang : str = "ko"):
                 level_file.write('\t'.join(card))
                 level_file.write('\n')
                 file_name = os.path.join(output_dir, word.replace('/', "|")) + ".mp3"
-                if not no_audio and not os.path.exists(file_name):
+                if (not no_audio and not (os.path.exists(file_name) or
+                        os.path.lexists("(krdict)".join(os.path.splitext(file_name))))):
                     if lang != "ko" or not try_krdict(word, file_name):
                         tts = gTTS(word, lang=lang)
                         tts.save(file_name)
