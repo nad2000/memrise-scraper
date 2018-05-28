@@ -1,0 +1,18 @@
+language: python
+python: '3.5'
+env:
+- TOXENV=py35
+install:
+- pip install tox
+script:
+- tox
+deploy:
+  provider: pypi
+  user: nad2000
+  password:
+    secure: MEOQa2q2Bv4eZ7+QcyjC9mx7T6dzil2vSwMcOpgLkYBgrer6PS48mw/dFFTyNY0O9zLeUAtudWWCqcfyFmZKa3pv2l29TkdgE+dhGQlCu+o/+Y3zq94JEQb7oIyL9stg4achAUAP2evx+Fr2GYRo6lIJzmwseSarzJy8coD9mX3OGPk7snvJ4ua+vdzElzvQp+6RYJ2zfNHF6hLV3oUuGSzvB56nbai3aRF6tG1cuUzrHFE2CE7StXPizaE7AgoYHy5oe9O5viRgviL+XQS4xH14PbpGXzxDdslpzmORnFosEaWmGEETF7bKPBdpeIFMnS2Adj3ERqae0wPGFpYNwi7MOOPz/qd1QoLZWSN4M2ToFQApTltD4IrRZowM/9Qvl/DJR6SP5ppubjpAjJknQULvDAbSbtLvjlJmP0VwysHjadmlHgUitY93Ps11+Lww+DiZBxznmPLRYlXTuuu7g4IiMXPVOH6/a6xU+6g9Sr6EQzaXSU/HweSb50rFaX8d5v2GvRH7BSLhQg9ggZxQZ2U9RtyyARPjI9anaNJf5nk65EN5NcmOYl7m8D1XATcuoCunZRY4qOv3jjo6L37APneH8XGLS5INtL/s/aNHUBjKQQeHyJI9GePc1HcWVnRVgWNzTfh/cqG1MLjwUG5Mhe4pY78/rNajqtLOZ3b/lkY=
+  distributions: sdist
+  on:
+    tags: true
+    repo: nad2000/Memrise-Scraper
+    condition: "$TOXENV = py35"
