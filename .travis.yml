@@ -14,5 +14,5 @@ deploy:
   distributions: sdist
   on:
     tags: true
-    repo: nad2000/Memrise-Scraper
+    repo: nad2000/memrise-scraper
     condition: "$TOXENV = py35"
