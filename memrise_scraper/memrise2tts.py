@@ -34,6 +34,29 @@ def try_krdict(word : str, output_filename: str):
             return
 
 
+def try_ttsmp3(word : str, output_filename: str):
+
+    with requests.post("https://ttsmp3.com/makemp3.php",
+            data=dict(msg=word, lang="Seoyeon", source="ttsmp3")) as res:
+        if res.status_code != 200:
+            return
+        if res.json().get("Error"):
+            return
+        url = res.json().get("URL")
+        if not url:
+            return
+    with requests.get(url, stream=True) as res:
+        if res.status_code != 200:
+            return
+        try:
+            output_filename = "(ttsmp3)".join(os.path.splitext(output_filename))
+            with open(output_filename, "wb") as o:
+                copyfileobj(res.raw, o)
+            return output_filename
+        except:
+            return
+
+
 def dump_tts(*, course_url : str, no_audio : bool, lang : str = "ko"):
     """
     :course_url:   course URL
@@ -65,9 +88,12 @@ def dump_tts(*, course_url : str, no_audio : bool, lang : str = "ko"):
                 file_name = os.path.join(output_dir, word.replace('/', "|")) + ".mp3"
                 if (not no_audio and not (os.path.exists(file_name) or
                         os.path.lexists("(krdict)".join(os.path.splitext(file_name))))):
-                    if lang != "ko" or not try_krdict(word, file_name):
+                    if lang != "ko" or not (try_krdict(word, file_name) or try_ttsmp3(word, file_name)):
                         tts = gTTS(word, lang=lang)
-                        tts.save(file_name)
+                        try:
+                            tts.save(file_name)
+                        except Exception as ex:
+                            print("* Failed to to save into", file_name, ":", ex)
 
 
 def main():
